@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CanaryMesh — Industrial IoT Security Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0A0F1E;--panel:#0F1628;--card:#141B35;--border:#1E2D55;
+  --accent:#3B82F6;--green:#10B981;--amber:#F59E0B;--purple:#8B5CF6;
+  --tp:#E2E8F0;--ts:#94A3B8;--tm:#475569;}
+body{background:var(--bg);color:var(--tp);font-family:system-ui,-apple-system,sans-serif;line-height:1.6;}
+a{color:inherit;text-decoration:none;}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;
+  border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:rgba(59,130,246,0.15);
+  border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.nav-links{display:flex;align-items:center;gap:16px;}
+.nav-links a{font-size:13px;color:var(--ts);}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity 0.2s;}
+.btn:hover{opacity:0.85;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--ts);}
+.hero{text-align:center;padding:80px 24px 60px;max-width:780px;margin:0 auto;}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,0.1);
+  border:1px solid rgba(59,130,246,0.3);border-radius:20px;padding:5px 14px;
+  font-size:11px;color:var(--accent);margin-bottom:24px;font-weight:600;}
+h1{font-size:42px;font-weight:800;line-height:1.15;letter-spacing:-0.03em;margin-bottom:20px;}
+h1 span{background:linear-gradient(135deg,var(--accent),#818CF8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{font-size:16px;color:var(--ts);margin-bottom:36px;}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-lg{padding:13px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:opacity 0.2s;}
+.btn-lg:hover{opacity:0.85;}
+.btn-lg-primary{background:var(--accent);color:#fff;}
+.btn-lg-outline{background:none;border:1px solid var(--border);color:var(--ts);}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);
+  max-width:600px;margin:56px auto 0;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.stat{background:var(--card);padding:24px;text-align:center;}
+.stat-val{font-size:30px;font-weight:700;color:var(--accent);}
+.stat-label{font-size:11px;color:var(--tm);margin-top:4px;}
+section.sec{padding:60px 24px;max-width:900px;margin:0 auto;}
+.sec-title{font-size:28px;font-weight:700;text-align:center;margin-bottom:8px;}
+.sec-sub{font-size:14px;color:var(--ts);text-align:center;margin-bottom:40px;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+.feat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.feat-icon{font-size:26px;margin-bottom:12px;}
+.feat-title{font-size:14px;font-weight:600;margin-bottom:6px;}
+.feat-desc{font-size:12px;color:var(--ts);line-height:1.65;}
+.industries{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:28px;}
+.ind{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;
+  text-align:center;cursor:pointer;transition:border-color 0.2s;}
+.ind:hover{border-color:var(--accent);}
+.ind-icon{font-size:28px;margin-bottom:8px;}
+.ind-name{font-size:12px;font-weight:500;}
+.steps{display:flex;flex-direction:column;gap:14px;margin-top:32px;}
+.step{display:flex;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.step-num{width:30px;height:30px;border-radius:50%;background:rgba(59,130,246,0.15);
+  border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;margin-top:1px;}
+.step-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.step-desc{font-size:12px;color:var(--ts);line-height:1.6;}
+.pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:32px;}
+.plan{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.plan.featured{border-color:var(--accent);background:rgba(59,130,246,0.04);}
+.plan-name{font-size:11px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;}
+.plan-price{font-size:30px;font-weight:700;margin-bottom:4px;}
+.plan-period{font-size:11px;color:var(--tm);margin-bottom:16px;}
+.plan-features{display:flex;flex-direction:column;gap:8px;}
+.pf{font-size:12px;color:var(--ts);display:flex;gap:7px;}
+.pf::before{content:"✓";color:var(--green);flex-shrink:0;}
+.plan-btn{width:100%;margin-top:20px;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;transition:opacity 0.2s;}
+.plan-btn:hover{opacity:0.85;}
+.cta-sec{background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:60px 24px;text-align:center;}
+.cta-sec h2{font-size:28px;font-weight:700;margin-bottom:12px;}
+.cta-sec p{font-size:14px;color:var(--ts);margin-bottom:28px;}
+.cta-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;max-width:440px;margin:0 auto;}
+.cta-form input{flex:1;min-width:200px;padding:11px 14px;border-radius:9px;background:var(--card);
+  border:1px solid var(--border);color:var(--tp);font-size:13px;outline:none;}
+footer{background:var(--panel);border-top:1px solid var(--border);padding:28px 24px;text-align:center;font-size:12px;color:var(--tm);}
+footer a{color:var(--accent);margin:0 10px;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <div>
+      <div style="font-size:16px;font-weight:700;letter-spacing:-0.02em;">CanaryMesh</div>
+      <div style="font-size:9px;color:var(--tm);letter-spacing:0.07em;">INDUSTRIAL IOT SECURITY</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#industries">Industries</a>
+    <a href="#pricing">Pricing</a>
+    <a href="../auth/login.html"><button class="btn btn-outline">Sign in</button></a>
+    <a href="../auth/register.html"><button class="btn btn-primary">Get started</button></a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="badge">🏭 Purpose-built for Industrial OT Networks</div>
+  <h1>Protect your factory.<br/><span>Before it's too late.</span></h1>
+  <p>CanaryMesh is a federated, privacy-preserving industrial IoT security platform.
+     Deploy on your existing OT network — no data ever leaves your premises.</p>
+  <div class="hero-btns">
+    <a href="../auth/register.html"><button class="btn-lg btn-lg-primary">Start free trial →</button></a>
+    <a href="http://localhost:5173/"><button class="btn-lg btn-lg-outline">View live demo</button></a>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-val">0 KB</div><div class="stat-label">Raw data shared externally</div></div>
+    <div class="stat"><div class="stat-val">&lt;2s</div><div class="stat-label">Threat detection time</div></div>
+    <div class="stat"><div class="stat-val">4-tier</div><div class="stat-label">Adaptive response system</div></div>
+  </div>
+</div>
+
+<section class="sec" id="features">
+  <div class="sec-title">Everything your SOC team needs</div>
+  <div class="sec-sub">From anomaly detection to incident response — all in one platform</div>
+  <div class="features-grid">
+    <div class="feat"><div class="feat-icon">🧠</div><div class="feat-title">Local Anomaly Detection</div>
+      <div class="feat-desc">Isolation Forest runs on each device. Sensor data never leaves the machine. Privacy by design.</div></div>
+    <div class="feat"><div class="feat-icon">🌸</div><div class="feat-title">Federated Learning</div>
+      <div class="feat-desc">All nodes get smarter via FedAvg gradient aggregation — without sharing raw industrial data.</div></div>
+    <div class="feat"><div class="feat-icon">🍯</div><div class="feat-title">Honeypot Deception</div>
+      <div class="feat-desc">Fake PLCs lure attackers. Any probe is fingerprinted and flagged instantly as HIGH severity.</div></div>
+    <div class="feat"><div class="feat-icon">⚡</div><div class="feat-title">Adaptive Response</div>
+      <div class="feat-desc">Low → Alert. Medium → Approve. High → Auto-isolate. Critical → Quarantine. Configurable per node.</div></div>
+    <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Live SOC Dashboard</div>
+      <div class="feat-desc">Real-time topology map, MQTT log, FL rounds, anomaly scores via WebSocket push.</div></div>
+    <div class="feat"><div class="feat-icon">📋</div><div class="feat-title">Incident Reports</div>
+      <div class="feat-desc">Export full incident reports as CSV. Every alert, decision and operator action permanently logged.</div></div>
+  </div>
+</section>
+
+<section class="sec" id="industries">
+  <div class="sec-title">Built for every industrial sector</div>
+  <div class="sec-sub">CanaryMesh adapts to your OT network — whatever the industry</div>
+  <div class="industries">
+    <div class="ind"><div class="ind-icon">🚗</div><div class="ind-name">Automotive</div></div>
+    <div class="ind"><div class="ind-icon">✈️</div><div class="ind-name">Aerospace</div></div>
+    <div class="ind"><div class="ind-icon">💊</div><div class="ind-name">Pharma</div></div>
+    <div class="ind"><div class="ind-icon">⚡</div><div class="ind-name">Power Grid</div></div>
+    <div class="ind"><div class="ind-icon">🛢️</div><div class="ind-name">Oil &amp; Gas</div></div>
+    <div class="ind"><div class="ind-icon">🏭</div><div class="ind-name">Manufacturing</div></div>
+    <div class="ind"><div class="ind-icon">💧</div><div class="ind-name">Water Treatment</div></div>
+    <div class="ind"><div class="ind-icon">🚂</div><div class="ind-name">Railways</div></div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-title">Up and running in 4 steps</div>
+  <div class="sec-sub">No hardware changes. No data leaving your premises.</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div>
+      <div class="step-title">Register your organisation</div>
+      <div class="step-desc">Create your company account, select your industry, add team members with role-based access control.</div>
+    </div></div>
+    <div class="step"><div class="step-num">2</div><div>
+      <div class="step-title">Connect your MQTT broker</div>
+      <div class="step-desc">Paste your Mosquitto broker URL (or use our simulator). CanaryMesh subscribes to your existing OT traffic.</div>
+    </div></div>
+    <div class="step"><div class="step-num">3</div><div>
+      <div class="step-title">Register your nodes</div>
+      <div class="step-desc">Add PLCs, sensors, SCADA by name, IP address and department. Each gets its own Isolation Forest model.</div>
+    </div></div>
+    <div class="step"><div class="step-num">4</div><div>
+      <div class="step-title">Monitor and respond</div>
+      <div class="step-desc">SOC dashboard goes live. Threats detected in under 2 seconds. Approve isolations, export reports.</div>
+    </div></div>
+  </div>
+</section>
+
+<section class="sec" id="pricing">
+  <div class="sec-title">Simple, transparent pricing</div>
+  <div class="sec-sub">Start free. Scale as you grow.</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">Free</div>
+      <div class="plan-period">Forever · Up to 10 nodes</div>
+      <div class="plan-features">
+        <div class="pf">Up to 10 IoT nodes</div>
+        <div class="pf">Basic anomaly detection</div>
+        <div class="pf">Live SOC dashboard</div>
+        <div class="pf">7-day alert history</div>
+      </div>
+      <a href="../auth/register.html"><button class="plan-btn btn-outline">Get started free</button></a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name" style="color:var(--accent)">Professional</div>
+      <div class="plan-price">₹49,999<span style="font-size:14px;font-weight:400">/mo</span></div>
+      <div class="plan-period">Per facility · Unlimited nodes</div>
+      <div class="plan-features">
+        <div class="pf">Unlimited nodes</div>
+        <div class="pf">Federated learning across sites</div>
+        <div class="pf">Honeypot deception layer</div>
+        <div class="pf">Incident report exports</div>
+        <div class="pf">Real MQTT broker connection</div>
+        <div class="pf">90-day audit trail</div>
+      </div>
+      <a href="../auth/register.html"><button class="plan-btn btn-primary" style="background:var(--accent);color:#fff;border:none;">Start 14-day trial</button></a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Enterprise</div>
+      <div class="plan-price">Custom</div>
+      <div class="plan-period">Multi-site · SLA guarantee</div>
+      <div class="plan-features">
+        <div class="pf">Multi-facility FL mesh</div>
+        <div class="pf">On-premise deployment</div>
+        <div class="pf">Dedicated support</div>
+        <div class="pf">Custom integrations</div>
+        <div class="pf">Compliance reporting</div>
+      </div>
+      <button class="plan-btn btn-outline" onclick="alert('Our sales team will reach out within 24 hours.')">Contact sales</button>
+    </div>
+  </div>
+</section>
+
+<div class="cta-sec">
+  <h2>Ready to secure your factory?</h2>
+  <p>Join industrial companies already using CanaryMesh to protect their OT networks.</p>
+  <div class="cta-form">
+    <input type="email" placeholder="your@company.com"/>
+    <a href="../auth/register.html"><button class="btn btn-primary" style="padding:11px 22px;">Request demo →</button></a>
+  </div>
+</div>
+
+<footer>
+  <div>© 2026 CanaryMesh · Built by <strong>TrustGrid</strong> · Cambridge Institute of Technology · HackfiniX 2026</div>
+  <div style="margin-top:8px;">
+    <a href="../auth/login.html">Login</a>
+    <a href="../auth/register.html">Register</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+</footer>
+</body>
+</html>

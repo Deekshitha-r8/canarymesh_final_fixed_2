@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SOC Dashboard — CanaryMesh</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0A0F1E;--panel:#0F1628;--card:#141B35;--border:#1E2D55;--borderB:#2A3F70;
+  --accent:#3B82F6;--teal:#0EA5E9;--green:#10B981;--amber:#F59E0B;--red:#EF4444;--purple:#8B5CF6;
+  --tp:#E2E8F0;--ts:#94A3B8;--tm:#475569;}
+body{background:var(--bg);color:var(--tp);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;
+  background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;}
+.logo-icon{width:28px;height:28px;border-radius:7px;background:rgba(59,130,246,0.15);
+  border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.company-badge{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);
+  border-radius:6px;padding:3px 10px;font-size:11px;color:var(--accent);font-weight:600;}
+.user-menu{display:flex;align-items:center;gap:12px;}
+.plan-tag{font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(16,185,129,0.15);
+  color:var(--green);border:1px solid rgba(16,185,129,0.3);font-weight:600;}
+.avatar{width:30px;height:30px;border-radius:50%;background:rgba(59,130,246,0.2);
+  border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);margin-right:4px;}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--panel);overflow-x:auto;}
+.tab{padding:10px 16px;font-size:12px;cursor:pointer;border:none;background:none;white-space:nowrap;
+  border-bottom:2px solid transparent;color:var(--ts);font-weight:400;transition:all 0.15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.content{padding:16px;max-width:1000px;margin:0 auto;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.stat-val{font-size:22px;font-weight:700;margin-top:3px;}
+.stat-label{font-size:10px;color:var(--tm);}
+.stat-sub{font-size:10px;color:var(--tm);margin-top:2px;}
+.panel-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.panel-title{font-size:12px;font-weight:600;color:var(--ts);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+.node-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--card);
+  border:1px solid var(--border);border-radius:9px;margin-bottom:6px;cursor:pointer;transition:border-color 0.2s;}
+.node-row:hover{border-color:var(--accent);}
+.node-icon{font-size:16px;width:28px;text-align:center;}
+.node-name{font-size:12px;font-weight:500;flex:1;}
+.node-ip{font-size:10px;color:var(--tm);font-family:monospace;}
+.score-bar{width:80px;height:4px;background:var(--border);border-radius:2px;}
+.score-fill{height:100%;border-radius:2px;transition:width 0.8s ease;}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;}
+.alert-item{background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:10px 12px;margin-bottom:8px;}
+.alert-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.alert-reason{font-size:11px;color:var(--ts);line-height:1.5;margin-bottom:6px;}
+.btn-sm{font-size:10px;padding:4px 10px;border-radius:6px;cursor:pointer;font-weight:600;border:none;}
+.settings-section{margin-bottom:20px;}
+.settings-title{font-size:13px;font-weight:600;color:var(--tp);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.settings-field{margin-bottom:12px;}
+.settings-field label{font-size:11px;color:var(--ts);display:block;margin-bottom:5px;}
+.settings-field input,.settings-field select{width:100%;padding:9px 12px;border-radius:8px;
+  background:var(--card);border:1px solid var(--border);color:var(--tp);font-size:13px;outline:none;}
+.settings-field input:focus{border-color:var(--accent);}
+.save-btn{padding:9px 22px;border-radius:8px;background:var(--accent);color:#fff;
+  border:none;cursor:pointer;font-weight:600;font-size:13px;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;
+  justify-content:center;z-index:200;padding:16px;}
+.modal-card{background:var(--panel);border:1px solid var(--borderB);border-radius:14px;
+  padding:24px;width:100%;max-width:380px;}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:16px;}
+.mfield{margin-bottom:12px;}
+.mfield label{font-size:11px;color:var(--ts);display:block;margin-bottom:5px;}
+.mfield input,.mfield select{width:100%;padding:9px 12px;border-radius:8px;background:var(--card);
+  border:1px solid var(--border);color:var(--tp);font-size:13px;outline:none;}
+.mbtn-row{display:flex;gap:8px;margin-top:16px;}
+.mbtn{flex:1;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;}
+.mbtn-primary{background:var(--accent);color:#fff;border:none;}
+.mbtn-outline{background:none;border:1px solid var(--border);color:var(--ts);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⬡</div>
+    <span style="font-size:14px;font-weight:700;">CanaryMesh</span>
+    <div class="company-badge" id="companyBadge">Loading...</div>
+  </div>
+  <div class="user-menu">
+    <div style="display:flex;align-items:center;font-size:11px;color:var(--ts);">
+      <div class="live-dot"></div>Live
+    </div>
+    <span class="plan-tag" id="planTag">Professional</span>
+    <div class="avatar" id="avatarBtn" title="Account settings">👤</div>
+    <button onclick="logout()" style="font-size:11px;padding:4px 10px;border-radius:6px;
+      background:none;border:1px solid var(--border);color:var(--tm);cursor:pointer;">Sign out</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('overview', event)">Overview</button>
+  <button class="tab" onclick="showTab('nodes', event)">My Nodes</button>
+  <button class="tab" onclick="showTab('alerts', event)">Alerts <span id="alertCountBadge"
+    style="background:#EF4444;color:#fff;border-radius:10px;padding:1px 5px;font-size:9px;margin-left:4px;"></span></button>
+  <button class="tab" onclick="showTab('reports', event)">Reports</button>
+  <button class="tab" onclick="showTab('settings', event)">Settings</button>
+</div>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="grid4">
+      <div class="stat-card"><div class="stat-label">Healthy nodes</div>
+        <div class="stat-val" id="st-healthy" style="color:var(--green)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Active threats</div>
+        <div class="stat-val" id="st-threats" style="color:var(--red)">—</div></div>
+      <div class="stat-card"><div class="stat-label">FL accuracy</div>
+        <div class="stat-val" id="st-fl" style="color:var(--accent)">—</div></div>
+      <div class="stat-card"><div class="stat-label">Data sent externally</div>
+        <div class="stat-val" style="color:var(--green)">0 KB</div>
+        <div class="stat-sub">Privacy preserved</div></div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-title">
+        <span>Network topology</span>
+        <span style="font-size:11px;color:var(--tm)" id="nodeCount">0 nodes</span>
+      </div>
+      <svg id="topoSvg" viewBox="0 0 100 60" style="width:100%;height:200px;" preserveAspectRatio="xMidYMid meet"></svg>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--tm)"><div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>Normal</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--tm)"><div style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></div>Suspicious</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--tm)"><div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div>Compromised</div>
+        <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--purple)"><div style="width:7px;height:7px;border-radius:50%;background:var(--purple)"></div>Honeypot</div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-title">Recent alerts (Medium+ only)</div>
+      <div id="alertsFeed"><div style="color:var(--tm);font-size:12px;text-align:center;padding:20px;">No alerts yet — all nodes operating normally ✓</div></div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-title">1-Click attack scenario</div>
+      <button id="scenarioBtn" onclick="runScenario()" style="width:100%;padding:11px;border-radius:9px;
+        cursor:pointer;font-weight:700;font-size:13px;border:none;
+        background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;margin-bottom:10px;">
+        ⚡ Industrial Cyber Attack Scenario
+      </button>
+      <div id="scenarioStatus" style="display:none;font-size:12px;color:var(--amber);text-align:center;padding:8px;
+        background:rgba(245,158,11,0.1);border-radius:7px;border:1px solid rgba(245,158,11,0.3);">
+        Scenario running...
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="triggerHoneypot()" style="flex:1;padding:8px;border-radius:8px;cursor:pointer;
+          font-size:11px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.4);color:var(--purple);">
+          Probe honeypot
+        </button>
+        <button onclick="simulateAttack()" style="flex:1;padding:8px;border-radius:8px;cursor:pointer;
+          font-size:11px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:var(--red);">
+          Simulate attack
+        </button>
+        <button onclick="clearAlerts()" style="flex:1;padding:8px;border-radius:8px;cursor:pointer;
+          font-size:11px;background:none;border:1px solid var(--border);color:var(--tm);">
+          Clear alerts
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NODES -->
+  <div class="tab-content" id="tab-nodes">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-size:12px;color:var(--tm);" id="nodesCount">0 nodes registered</span>
+      <button onclick="document.getElementById('addNodeModal').style.display='flex'"
+        style="padding:7px 16px;border-radius:8px;background:var(--accent);color:#fff;
+        border:none;cursor:pointer;font-weight:600;font-size:12px;">+ Add node</button>
+    </div>
+    <div id="nodesList"></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="tab-content" id="tab-alerts">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <span style="font-size:12px;color:var(--tm);" id="allAlertsCount">0 alerts</span>
+      <button onclick="clearAlerts()" style="font-size:11px;padding:4px 10px;border-radius:6px;
+        background:none;border:1px solid var(--border);color:var(--tm);cursor:pointer;">Clear all</button>
+    </div>
+    <div id="allAlertsFeed"></div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="tab-content" id="tab-reports">
+    <div class="panel-card">
+      <div class="panel-title">Incident reports</div>
+      <div style="font-size:12px;color:var(--ts);margin-bottom:16px;line-height:1.6;">
+        Export your security incident history. Reports include all alerts, operator decisions, FL rounds, and threat classifications.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="exportCSV()" style="padding:11px;border-radius:9px;cursor:pointer;font-weight:600;
+          font-size:13px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.4);color:var(--accent);">
+          📊 Export incident report (CSV)
+        </button>
+        <button onclick="exportJSON()" style="padding:11px;border-radius:9px;cursor:pointer;font-weight:600;
+          font-size:13px;background:none;border:1px solid var(--border);color:var(--ts);">
+          📄 Export full audit log (JSON)
+        </button>
+      </div>
+    </div>
+    <div class="panel-card">
+      <div class="panel-title">Privacy compliance summary</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--card);border-radius:9px;padding:12px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:var(--green);">0 KB</div>
+          <div style="font-size:10px;color:var(--tm);margin-top:4px;">Raw data shared externally</div>
+        </div>
+        <div style="background:var(--card);border-radius:9px;padding:12px;text-align:center;">
+          <div style="font-size:24px;font-weight:700;color:var(--accent);" id="weightsKb">2.4 KB</div>
+          <div style="font-size:10px;color:var(--tm);margin-top:4px;">Model gradients exchanged</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:11px;color:var(--ts);background:rgba(16,185,129,0.08);
+        border:1px solid rgba(16,185,129,0.25);border-radius:8px;padding:10px;line-height:1.6;">
+        ✓ All anomaly detection runs locally on each device. Only model gradients (not raw sensor data) are shared via Federated Learning. Compliant with data sovereignty requirements.
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-content" id="tab-settings">
+    <div class="panel-card">
+      <div class="settings-section">
+        <div class="settings-title">Company profile</div>
+        <div class="settings-field"><label>Company name</label><input id="s-company"/></div>
+        <div class="settings-field"><label>Industry</label><select id="s-industry">
+          <option>Manufacturing</option><option>Automotive</option><option>Aerospace</option>
+          <option>Pharma</option><option>Power Grid</option><option>Oil &amp; Gas</option>
+          <option>Water Treatment</option><option>Railways</option>
+        </select></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">MQTT broker connection</div>
+        <div class="settings-field"><label>Broker URL (leave blank for simulator)</label>
+          <input id="s-mqtt" placeholder="mqtt://192.168.1.100:1883"/></div>
+        <div style="font-size:11px;color:var(--ts);margin-top:-6px;margin-bottom:10px;line-height:1.5;">
+          Connect to your real Mosquitto broker. CanaryMesh will subscribe to all device topics automatically.
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Alert thresholds</div>
+        <div class="settings-field"><label>Medium threshold (anomaly score %)</label>
+          <input type="number" id="s-med" value="35" min="10" max="60"/></div>
+        <div class="settings-field"><label>High threshold (anomaly score %)</label>
+          <input type="number" id="s-high" value="60" min="40" max="80"/></div>
+        <div class="settings-field"><label>Critical threshold (anomaly score %)</label>
+          <input type="number" id="s-crit" value="75" min="60" max="95"/></div>
+      </div>
+      <button class="save-btn" onclick="saveSettings()">Save settings</button>
+      <div id="saveMsg" style="display:none;margin-top:10px;font-size:12px;color:var(--green);">✓ Settings saved</div>
+    </div>
+    <div class="panel-card">
+      <div class="settings-title">Account</div>
+      <div style="font-size:12px;color:var(--ts);margin-bottom:12px;" id="accountInfo">Loading...</div>
+      <button onclick="logout()" style="padding:9px 18px;border-radius:8px;cursor:pointer;font-size:12px;
+        background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:var(--red);font-weight:600;">
+        Sign out
+      </button>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Add Node Modal -->
+<div id="addNodeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);
+  align-items:center;justify-content:center;z-index:200;padding:16px;">
+  <div class="modal-card">
+    <div class="modal-title">Add new node</div>
+    <div class="mfield"><label>Node name *</label><input id="m-name" placeholder="e.g. PLC-07 Assembly Line"/></div>
+    <div class="mfield"><label>Type</label><select id="m-type">
+      <option>PLC</option><option>Sensor</option><option>SCADA</option><option>HMI</option>
+    </select></div>
+    <div class="mfield"><label>IP address</label><input id="m-ip" placeholder="192.168.1.50"/></div>
+    <div class="mfield"><label>Department / Location</label><input id="m-dept" placeholder="Assembly Line B, Floor 2"/></div>
+    <div class="mfield"><label>Base traffic (req/min)</label>
+      <input type="range" id="m-traffic" min="20" max="400" value="100"
+        oninput="document.getElementById('m-traffic-val').textContent=this.value"/>
+      <span id="m-traffic-val" style="font-size:11px;color:var(--accent);">100</span> req/min
+    </div>
+    <div class="mbtn-row">
+      <button class="mbtn mbtn-outline" onclick="document.getElementById('addNodeModal').style.display='none'">Cancel</button>
+      <button class="mbtn mbtn-primary" onclick="addNode()">Add node</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let user = null
+let nodes = []
+let alerts = []
+let flAccuracy = 91.4
+let weightsKb = 2.4
+let scenarioRunning = false
+
+const SEV_COLORS = {LOW:'#10B981',MEDIUM:'#F59E0B',HIGH:'#EF4444',CRITICAL:'#FF0000'}
+const SEV_ACTIONS = {LOW:'Alert only',MEDIUM:'Pending approval',HIGH:'Auto-isolating',CRITICAL:'Quarantined'}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+window.onload = () => {
+  user = JSON.parse(localStorage.getItem('cm_current_user') || 'null')
+  if (!user) { window.location.href = '../auth/login.html'; return }
+
+  document.getElementById('companyBadge').textContent = user.company || 'CanaryMesh'
+  document.getElementById('planTag').textContent      = user.plan || 'Professional'
+  document.getElementById('accountInfo').textContent  =
+    `${user.firstName || ''} ${user.lastName || ''} · ${user.email} · ${user.role || 'SOC Admin'}`
+
+  const s = document.getElementById('s-company')
+  if (s) s.value = user.company || ''
+
+  // Load saved nodes for this company
+  const saved = JSON.parse(localStorage.getItem(`cm_nodes_${user.email}`) || 'null')
+  if (saved) {
+    nodes = saved
+  } else {
+    // Default nodes based on industry
+    nodes = defaultNodes(user.industry || 'Manufacturing')
+    saveNodes()
+  }
+
+  render()
+  setInterval(tick, 1800)
+  setInterval(() => {
+    weightsKb = parseFloat((weightsKb + 0.1).toFixed(1))
+    const el = document.getElementById('weightsKb')
+    if (el) el.textContent = weightsKb + ' KB'
+  }, 3000)
+}
+
+function defaultNodes(industry) {
+  const base = [
+    {id:'N1',name:'PLC-01',type:'PLC',ip:'192.168.1.10',dept:'Production Floor',score:0.04,traffic:120,status:'normal',isolated:false},
+    {id:'N2',name:'Temperature-Sensor-02',type:'Sensor',ip:'192.168.1.11',dept:'Heat Treatment',score:0.06,traffic:85,status:'normal',isolated:false},
+    {id:'N3',name:'SCADA-03',type:'SCADA',ip:'192.168.1.12',dept:'Control Room',score:0.05,traffic:210,status:'normal',isolated:false},
+    {id:'N4',name:'Pressure-Sensor-04',type:'Sensor',ip:'192.168.1.13',dept:'Hydraulics',score:0.07,traffic:95,status:'normal',isolated:false},
+    {id:'N5',name:'Motor-Controller-05',type:'HMI',ip:'192.168.1.14',dept:'Assembly Line',score:0.04,traffic:145,status:'normal',isolated:false},
+    {id:'N6',name:'PLC-06',type:'PLC',ip:'192.168.1.15',dept:'Packaging',score:0.09,traffic:189,status:'normal',isolated:false},
+  ]
+  return base
+}
+
+// ── Simulation tick ────────────────────────────────────────────────────────
+function tick() {
+  nodes.forEach(n => {
+    if (n.isolated) return
+    const drift = (Math.random() - 0.48) * 0.013
+    n.score = Math.max(0.01, Math.min(0.93, n.score + drift))
+    n.traffic = Math.max(20, Math.round(n.traffic + (Math.random()-0.5)*10))
+    n.status = n.score>0.70?'compromised':n.score>0.38?'suspicious':'normal'
+    // Auto-generate alerts
+    if (n.score > 0.60) maybeAddAlert(n,'HIGH')
+    else if (n.score > 0.38) maybeAddAlert(n,'MEDIUM')
+  })
+  flAccuracy = Math.min(99.2, Math.max(88, flAccuracy + (Math.random()-0.42)*0.25))
+  render()
+}
+
+function maybeAddAlert(n, sev) {
+  const existing = alerts.find(a => a.nodeId===n.id && a.severity===sev)
+  if (!existing) {
+    alerts.unshift({
+      id: Date.now().toString(),
+      nodeId: n.id, node: n.name,
+      time: new Date().toTimeString().slice(0,8),
+      severity: sev,
+      reason: n.score > 0.70
+        ? `${n.name} (${n.ip}) shows strong compromise indicators. Traffic ${(n.score*3.2).toFixed(1)}× baseline. Lateral movement risk. Immediate isolation recommended.`
+        : `Anomalous packet timing on ${n.name}. Port diversity outside normal range. Monitoring recommended.`
+    })
+    if (alerts.length > 50) alerts = alerts.slice(0,50)
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const realNodes = nodes
+  const healthy = realNodes.filter(n=>n.status==='normal').length
+  const threats  = realNodes.filter(n=>n.status!=='normal'&&!n.isolated).length
+  const medPlus  = alerts.filter(a=>a.severity!=='LOW')
+
+  document.getElementById('st-healthy').textContent = `${healthy}/${realNodes.length}`
+  document.getElementById('st-threats').textContent  = threats
+  document.getElementById('st-fl').textContent       = flAccuracy.toFixed(1)+'%'
+  document.getElementById('nodesCount').textContent  = `${realNodes.length} nodes registered`
+  document.getElementById('nodeCount').textContent   = `${realNodes.length} nodes · 2 honeypots`
+
+  const badge = document.getElementById('alertCountBadge')
+  badge.textContent = medPlus.length || ''
+  badge.style.display = medPlus.length ? 'inline' : 'none'
+  document.getElementById('allAlertsCount').textContent = `${alerts.length} alerts`
+
+  renderTopology()
+  renderNodesList()
+  renderAlerts()
+}
+
+function nodeColor(n) {
+  if (n.isolated) return '#EF4444'
+  if (n.status==='compromised') return '#EF4444'
+  if (n.status==='suspicious')  return '#F59E0B'
+  return '#10B981'
+}
+
+const NODE_POS = [
+  {x:15,y:20},{x:38,y:12},{x:62,y:18},{x:25,y:40},{x:50,y:38},{x:75,y:45},
+  {x:10,y:52},{x:68,y:58}
+]
+const HP_POS = [{x:10,y:52},{x:82,y:52}]
+const EDGES = [[0,1],[1,2],[0,3],[3,4],[4,5],[2,5],[1,4]]
+
+function renderTopology() {
+  const svg = document.getElementById('topoSvg')
+  if (!svg) return
+  let html = ''
+  EDGES.forEach(([a,b]) => {
+    const pa = NODE_POS[a]||{x:50,y:30}, pb = NODE_POS[b]||{x:60,y:40}
+    html += `<line x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}"
+      stroke="#2A3F70" stroke-width="0.5" stroke-dasharray="2,1.5" opacity="0.7"/>`
+  })
+  nodes.forEach((n,i) => {
+    const p = NODE_POS[i] || {x:50+i*8,y:30}
+    const c = nodeColor(n)
+    html += `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="${c}25" stroke="${c}" stroke-width="0.9"/>
+      <text x="${p.x}" y="${p.y+7}" text-anchor="middle" font-size="2.4" fill="#94A3B8" font-family="monospace">${n.name.slice(0,8)}</text>`
+  })
+  HP_POS.forEach((p,i) => {
+    html += `<circle cx="${p.x}" cy="${p.y}" r="2.8" fill="#8B5CF625" stroke="#8B5CF6" stroke-width="0.6" stroke-dasharray="1.5,1"/>
+      <text x="${p.x}" y="${p.y+6.5}" text-anchor="middle" font-size="2.2" fill="#94A3B8" font-family="monospace">HP-${i+1}</text>`
+  })
+  svg.innerHTML = html
+}
+
+function renderNodesList() {
+  const el = document.getElementById('nodesList')
+  if (!el) return
+  el.innerHTML = nodes.map(n => {
+    const c = nodeColor(n)
+    const scoreW = Math.round(n.score*100)
+    return `<div class="node-row" onclick="toggleIsolate('${n.id}')">
+      <span class="node-icon">${{PLC:'⚙',Sensor:'◈',SCADA:'▣',HMI:'⬡'}[n.type]||'◉'}</span>
+      <div style="flex:1;">
+        <div class="node-name">${n.name}</div>
+        <div class="node-ip">${n.ip || ''} · ${n.dept || ''}</div>
+      </div>
+      <div style="margin-right:10px;">
+        <div class="score-bar"><div class="score-fill" style="width:${scoreW}%;background:${c}"></div></div>
+        <div style="font-size:9px;color:${c};margin-top:2px;text-align:right">${scoreW}%</div>
+      </div>
+      <div class="status-dot" style="background:${c}"></div>
+      <span class="badge" style="background:${c}18;color:${c};border:1px solid ${c}44;margin-left:6px;">
+        ${n.isolated?'isolated':n.status}
+      </span>
+    </div>`
+  }).join('')
+}
+
+function renderAlerts() {
+  const medPlus = alerts.filter(a => a.severity !== 'LOW')
+
+  const feedEl = document.getElementById('alertsFeed')
+  if (feedEl) {
+    if (medPlus.length === 0) {
+      feedEl.innerHTML = '<div style="color:var(--tm);font-size:12px;text-align:center;padding:16px;">✓ No medium/high alerts</div>'
+    } else {
+      feedEl.innerHTML = medPlus.slice(0,4).map(a => alertHTML(a)).join('')
+    }
+  }
+
+  const allEl = document.getElementById('allAlertsFeed')
+  if (allEl) {
+    if (alerts.length === 0) {
+      allEl.innerHTML = '<div style="color:var(--tm);font-size:12px;text-align:center;padding:40px;">No alerts yet.</div>'
+    } else {
+      allEl.innerHTML = alerts.map(a => alertHTML(a)).join('')
+    }
+  }
+}
+
+function alertHTML(a) {
+  const c = SEV_COLORS[a.severity] || '#10B981'
+  const act = SEV_ACTIONS[a.severity] || ''
+  return `<div class="alert-item" style="border-left:3px solid ${c}">
+    <div class="alert-top">
+      <div style="display:flex;align-items:center;gap:7px;">
+        <span class="badge" style="background:${c}18;color:${c};border:1px solid ${c}44;">${a.severity}</span>
+        <span style="font-size:12px;font-weight:600;">${a.node}</span>
+      </div>
+      <span style="font-size:10px;color:var(--tm);font-family:monospace;">${a.time}</span>
+    </div>
+    <div class="alert-reason">${a.reason}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:10px;color:${c};font-weight:500;">● ${act}</span>
+      ${a.severity==='MEDIUM'?`<button class="btn-sm" onclick="approveAlert('${a.id}')"
+        style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.5);color:#F59E0B;cursor:pointer;">
+        Approve isolation</button>`:''}
+    </div>
+  </div>`
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+function toggleIsolate(id) {
+  const n = nodes.find(n=>n.id===id)
+  if (!n) return
+  n.isolated = !n.isolated
+  if (n.isolated) {
+    alerts.unshift({id:Date.now().toString(),nodeId:id,node:n.name,
+      time:new Date().toTimeString().slice(0,8),severity:'HIGH',
+      reason:`Node manually isolated by operator. Removed from FL mesh. Traffic blocked pending investigation.`})
+  }
+  saveNodes(); render()
+}
+
+function approveAlert(id) {
+  const a = alerts.find(x=>x.id===id)
+  if (a) { a.severity='HIGH'; render() }
+}
+
+function clearAlerts() { alerts=[]; render() }
+
+function addNode() {
+  const name = document.getElementById('m-name').value.trim()
+  if (!name) { alert('Please enter a node name'); return }
+  const n = {
+    id: 'U'+Math.random().toString(36).slice(2,6).toUpperCase(),
+    name, type: document.getElementById('m-type').value,
+    ip: document.getElementById('m-ip').value||'—',
+    dept: document.getElementById('m-dept').value||'—',
+    score: 0.04, traffic: parseInt(document.getElementById('m-traffic').value)||100,
+    status:'normal', isolated:false,
+  }
+  nodes.push(n); saveNodes()
+  document.getElementById('addNodeModal').style.display='none'
+  document.getElementById('m-name').value=''
+  render()
+}
+
+function saveNodes() {
+  if (user) localStorage.setItem(`cm_nodes_${user.email}`, JSON.stringify(nodes))
+}
+
+async function triggerHoneypot() {
+  try {
+    const r = await fetch('http://localhost:8000/api/simulate/honeypot_probe',{method:'POST'})
+    if (r.ok) {
+      const d = await r.json()
+      if (d.alert) { alerts.unshift(d.alert); render() }
+    }
+  } catch {
+    alerts.unshift({id:Date.now().toString(),nodeId:'HP1',node:'PLC-99 (Honeypot)',
+      time:new Date().toTimeString().slice(0,8),severity:'HIGH',
+      reason:'Honeypot probed from 192.168.99.1. Credentials attempted: admin/admin. Attacker fingerprinted.'})
+    render()
+  }
+}
+
+function simulateAttack() {
+  const active = nodes.filter(n=>!n.isolated)
+  if (!active.length) return
+  const n = active[Math.floor(Math.random()*active.length)]
+  n.score = Math.min(0.92, n.score + 0.35)
+  n.status = 'compromised'
+  maybeAddAlert(n,'HIGH')
+  render()
+}
+
+async function runScenario() {
+  if (scenarioRunning) return
+  scenarioRunning = true
+  const btn = document.getElementById('scenarioBtn')
+  const status = document.getElementById('scenarioStatus')
+  const steps = [
+    ['Reconnaissance — scanning network ports...', () => { simulateAttack(); }],
+    ['Honeypot probe — decoy PLC-99 contacted...', () => { triggerHoneypot(); }],
+    ['Lateral movement — cross-node attack detected...', () => {
+      nodes.filter(n=>!n.isolated).forEach(n => { n.score = Math.min(0.85, n.score+0.2) })
+    }],
+    ['Isolation — quarantining compromised nodes...', () => {
+      nodes.filter(n=>n.status==='compromised').forEach(n => {
+        n.isolated=true
+        alerts.unshift({id:Date.now().toString(),nodeId:n.id,node:n.name,
+          time:new Date().toTimeString().slice(0,8),severity:'CRITICAL',
+          reason:`Node quarantined during attack scenario. Removed from FL mesh.`})
+      })
+      saveNodes()
+    }],
+  ]
+  status.style.display='block'
+  btn.disabled=true
+  for (const [label, action] of steps) {
+    status.textContent = label
+    action()
+    render()
+    await new Promise(r=>setTimeout(r,2000))
+  }
+  status.style.display='none'
+  btn.disabled=false
+  scenarioRunning=false
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function showTab(id, evt) {
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'))
+  document.getElementById('tab-'+id).classList.add('active')
+  const e = evt || window.event
+  const btn = e && e.currentTarget ? e.currentTarget : (e && e.target ? e.target.closest('.tab') : null)
+  if (btn) btn.classList.add('active')
+  else {
+    // Fallback: match the button whose onclick references this tab id
+    const match = Array.from(document.querySelectorAll('.tab')).find(b => (b.getAttribute('onclick')||'').includes(`'${id}'`))
+    if (match) match.classList.add('active')
+  }
+}
+
+// ── Settings ───────────────────────────────────────────────────────────────
+function saveSettings() {
+  if (user) {
+    user.company  = document.getElementById('s-company').value || user.company
+    user.industry = document.getElementById('s-industry').value
+    user.mqttUrl  = document.getElementById('s-mqtt').value || 'simulator'
+    localStorage.setItem('cm_current_user', JSON.stringify(user))
+    document.getElementById('companyBadge').textContent = user.company
+  }
+  const msg = document.getElementById('saveMsg')
+  msg.style.display='block'
+  setTimeout(()=>msg.style.display='none', 2500)
+}
+
+// ── Export ─────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const rows = [['Time','Node','Severity','Reason','Action']]
+  alerts.forEach(a => rows.push([a.time,a.node,a.severity,`"${a.reason}"`,SEV_ACTIONS[a.severity]||'']))
+  const csv = rows.map(r=>r.join(',')).join('\n')
+  download('canarymesh_incident_report.csv', csv, 'text/csv')
+}
+
+function exportJSON() {
+  const data = { company: user?.company, exportedAt: new Date().toISOString(),
+    nodes: nodes, alerts: alerts }
+  download('canarymesh_audit_log.json', JSON.stringify(data, null, 2), 'application/json')
+}
+
+function download(filename, content, mime) {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([content],{type:mime}))
+  a.download = filename; a.click()
+}
+
+function logout() {
+  localStorage.removeItem('cm_current_user')
+  window.location.href = '../auth/login.html'
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Node
+node_modules/
+dist/
+
+# Local env / editor
+.env
+.env.local
+.vscode/

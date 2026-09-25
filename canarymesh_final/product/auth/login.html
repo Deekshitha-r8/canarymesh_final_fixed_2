@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Sign in — CanaryMesh</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0A0F1E;--panel:#0F1628;--card:#141B35;--border:#1E2D55;
+  --accent:#3B82F6;--green:#10B981;--red:#EF4444;--tp:#E2E8F0;--ts:#94A3B8;--tm:#475569;}
+body{background:var(--bg);color:var(--tp);font-family:system-ui,-apple-system,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;}
+.top-bar{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--panel);
+  display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--tp);}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:rgba(59,130,246,0.15);
+  border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:32px 16px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;
+  padding:32px;width:100%;max-width:400px;}
+.card-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+.card-sub{font-size:13px;color:var(--ts);margin-bottom:28px;}
+.field{margin-bottom:16px;}
+label{font-size:12px;color:var(--ts);display:block;margin-bottom:6px;font-weight:500;}
+input{width:100%;padding:11px 14px;border-radius:9px;background:var(--card);
+  border:1px solid var(--border);color:var(--tp);font-size:14px;outline:none;transition:border-color 0.2s;}
+input:focus{border-color:var(--accent);}
+.forgot{font-size:12px;color:var(--accent);float:right;margin-top:-4px;}
+.btn-submit{width:100%;padding:12px;border-radius:9px;background:var(--accent);
+  color:#fff;font-size:14px;font-weight:700;cursor:pointer;border:none;margin-top:8px;transition:opacity 0.2s;}
+.btn-submit:hover{opacity:0.88;}
+.divider{text-align:center;font-size:12px;color:var(--tm);margin:20px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.divider::before{left:0;} .divider::after{right:0;}
+.demo-box{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);
+  border-radius:10px;padding:14px;margin-bottom:20px;}
+.demo-box-title{font-size:11px;color:var(--accent);font-weight:600;margin-bottom:8px;}
+.demo-cred{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.demo-cred span{color:var(--ts);}
+.demo-cred code{color:var(--tp);background:var(--card);padding:1px 6px;border-radius:4px;font-size:11px;}
+.switch{text-align:center;font-size:13px;color:var(--ts);margin-top:20px;}
+.switch a{color:var(--accent);font-weight:600;}
+.error{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);
+  border-radius:8px;padding:10px 12px;font-size:12px;color:#FCA5A5;margin-bottom:16px;display:none;}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="../landing/index.html" class="logo">
+    <div class="logo-icon">⬡</div>
+    <span style="font-size:15px;font-weight:700;">CanaryMesh</span>
+  </a>
+  <a href="register.html" style="font-size:13px;color:var(--accent);">Create account →</a>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="card-title">Welcome back</div>
+    <div class="card-sub">Sign in to your CanaryMesh SOC dashboard</div>
+
+    <!-- Demo credentials box -->
+    <div class="demo-box">
+      <div class="demo-box-title">🎯 Demo credentials (for judges)</div>
+      <div class="demo-cred"><span>Email</span><code>demo@acmecorp.com</code></div>
+      <div class="demo-cred"><span>Password</span><code>demo1234</code></div>
+      <div class="demo-cred"><span>Role</span><code>SOC Admin</code></div>
+    </div>
+
+    <div class="error" id="errorBox">Invalid email or password. Please try again.</div>
+
+    <div class="field">
+      <label>Company email</label>
+      <input type="email" id="email" placeholder="you@company.com" value="demo@acmecorp.com"/>
+    </div>
+    <div class="field">
+      <label>Password <a href="#" class="forgot">Forgot password?</a></label>
+      <input type="password" id="password" placeholder="••••••••" value="demo1234"/>
+    </div>
+    <button class="btn-submit" onclick="handleLogin()">Sign in to dashboard</button>
+
+    <div class="divider">or</div>
+    <div class="switch">Don't have an account? <a href="register.html">Register your company →</a></div>
+  </div>
+</div>
+
+<script>
+function handleLogin() {
+  const email = document.getElementById('email').value
+  const pass  = document.getElementById('password').value
+  const err   = document.getElementById('errorBox')
+
+  // Load registered companies from localStorage
+  const companies = JSON.parse(localStorage.getItem('cm_companies') || '[]')
+  const demo = { email:'demo@acmecorp.com', password:'demo1234', company:'Acme Corporation',
+    industry:'Manufacturing', role:'SOC Admin', plan:'Professional' }
+
+  const allUsers = [demo, ...companies]
+  const user = allUsers.find(u => u.email === email && u.password === pass)
+
+  if (user) {
+    localStorage.setItem('cm_current_user', JSON.stringify(user))
+    err.style.display = 'none'
+    window.location.href = 'http://localhost:5173/'
+  } else {
+    err.style.display = 'block'
+  }
+}
+document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin() })
+</script>
+</body>
+</html>

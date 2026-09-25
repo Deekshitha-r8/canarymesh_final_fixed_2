@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Register your company — CanaryMesh</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0A0F1E;--panel:#0F1628;--card:#141B35;--border:#1E2D55;
+  --accent:#3B82F6;--green:#10B981;--red:#EF4444;--tp:#E2E8F0;--ts:#94A3B8;--tm:#475569;}
+body{background:var(--bg);color:var(--tp);font-family:system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+.top-bar{padding:16px 24px;border-bottom:1px solid var(--border);background:var(--panel);display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--tp);}
+.logo-icon{width:30px;height:30px;border-radius:8px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.4);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:460px;}
+.steps-indicator{display:flex;gap:6px;margin-bottom:28px;}
+.si{height:3px;border-radius:2px;flex:1;background:var(--border);transition:background 0.3s;}
+.si.active{background:var(--accent);}
+.si.done{background:var(--green);}
+.step{display:none;}
+.step.active{display:block;}
+.step-label{font-size:11px;color:var(--ts);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+.step-title{font-size:20px;font-weight:700;margin-bottom:6px;}
+.step-sub{font-size:13px;color:var(--ts);margin-bottom:24px;}
+.field{margin-bottom:14px;}
+label{font-size:12px;color:var(--ts);display:block;margin-bottom:5px;font-weight:500;}
+input,select{width:100%;padding:11px 14px;border-radius:9px;background:var(--card);border:1px solid var(--border);color:var(--tp);font-size:13px;outline:none;transition:border-color 0.2s;}
+input:focus,select:focus{border-color:var(--accent);}
+select option{background:var(--card);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.industry-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;}
+.ind-option{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px 8px;
+  text-align:center;cursor:pointer;transition:all 0.2s;font-size:11px;}
+.ind-option:hover{border-color:var(--accent);}
+.ind-option.selected{border-color:var(--accent);background:rgba(59,130,246,0.12);}
+.ind-option .icon{font-size:22px;margin-bottom:4px;}
+.plan-cards{display:flex;flex-direction:column;gap:10px;margin-top:4px;}
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all 0.2s;display:flex;justify-content:space-between;align-items:center;}
+.plan-card:hover{border-color:var(--accent);}
+.plan-card.selected{border-color:var(--accent);background:rgba(59,130,246,0.08);}
+.plan-card-name{font-size:13px;font-weight:600;}
+.plan-card-desc{font-size:11px;color:var(--ts);margin-top:2px;}
+.plan-card-price{font-size:13px;font-weight:700;color:var(--accent);}
+.mqtt-info{background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.2);border-radius:9px;padding:12px;margin-top:8px;font-size:11px;color:var(--ts);line-height:1.6;}
+.success-icon{font-size:48px;text-align:center;margin-bottom:16px;}
+.success-list{display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+.success-item{display:flex;gap:10px;align-items:flex-start;font-size:13px;}
+.success-item::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px;}
+.btn-row{display:flex;gap:10px;margin-top:20px;}
+.btn{padding:11px 20px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;flex:1;transition:opacity 0.2s;}
+.btn:hover{opacity:0.85;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--ts);}
+.progress{font-size:11px;color:var(--tm);text-align:center;margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="../landing/index.html" class="logo">
+    <div class="logo-icon">⬡</div>
+    <span style="font-size:15px;font-weight:700;">CanaryMesh</span>
+  </a>
+  <a href="login.html" style="font-size:13px;color:var(--ts);">Already have an account? <span style="color:var(--accent)">Sign in →</span></a>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="steps-indicator">
+      <div class="si active" id="si0"></div>
+      <div class="si" id="si1"></div>
+      <div class="si" id="si2"></div>
+      <div class="si" id="si3"></div>
+    </div>
+
+    <!-- Step 1: Company info -->
+    <div class="step active" id="step0">
+      <div class="step-label">Step 1 of 4</div>
+      <div class="step-title">Register your company</div>
+      <div class="step-sub">Set up your CanaryMesh organisation account</div>
+      <div class="field"><label>Company name *</label><input id="company" placeholder="e.g. Acme Manufacturing Ltd."/></div>
+      <div class="two-col">
+        <div class="field"><label>First name *</label><input id="fname" placeholder="abc"/></div>
+        <div class="field"><label>Last name *</label><input id="lname" placeholder="xyz"/></div>
+      </div>
+      <div class="field"><label>Company email *</label><input id="email" type="email" placeholder="you@company.com"/></div>
+      <div class="two-col">
+        <div class="field"><label>Password *</label><input id="password" type="password" placeholder="Min 8 characters"/></div>
+        <div class="field"><label>Phone</label><input id="phone" placeholder="+91 9876543210"/></div>
+      </div>
+      <div class="field"><label>Company size</label>
+        <select id="size">
+          <option>1–50 employees</option><option>51–200 employees</option>
+          <option>201–1000 employees</option><option>1000+ employees</option>
+        </select>
+      </div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="nextStep(1)">Continue →</button></div>
+    </div>
+
+    <!-- Step 2: Industry -->
+    <div class="step" id="step1">
+      <div class="step-label">Step 2 of 4</div>
+      <div class="step-title">Select your industry</div>
+      <div class="step-sub">We'll customise your node templates and alert thresholds</div>
+      <div class="industry-grid">
+        <div class="ind-option" onclick="selectIndustry(this,'Automotive')"><div class="icon">🚗</div>Automotive</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Aerospace')"><div class="icon">✈️</div>Aerospace</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Pharma')"><div class="icon">💊</div>Pharma</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Power Grid')"><div class="icon">⚡</div>Power Grid</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Oil & Gas')"><div class="icon">🛢️</div>Oil &amp; Gas</div>
+        <div class="ind-option selected" onclick="selectIndustry(this,'Manufacturing')"><div class="icon">🏭</div>Manufacturing</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Water Treatment')"><div class="icon">💧</div>Water Treatment</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Railways')"><div class="icon">🚂</div>Railways</div>
+        <div class="ind-option" onclick="selectIndustry(this,'Other')"><div class="icon">⚙️</div>Other</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="nextStep(0)">← Back</button>
+        <button class="btn btn-primary" onclick="nextStep(2)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: MQTT + Plan -->
+    <div class="step" id="step2">
+      <div class="step-label">Step 3 of 4</div>
+      <div class="step-title">Connect your network</div>
+      <div class="step-sub">Enter your MQTT broker details or use our built-in simulator</div>
+      <div class="field">
+        <label>MQTT broker URL</label>
+        <input id="mqtt_url" placeholder="mqtt://192.168.1.100:1883 (leave blank for simulator)"/>
+        <div class="mqtt-info">
+          Leave blank to use CanaryMesh's built-in industrial network simulator.
+          For real deployment, enter your Mosquitto broker IP.
+          Your credentials are never stored on our servers.
+        </div>
+      </div>
+      <div class="field"><label>MQTT username (optional)</label><input id="mqtt_user" placeholder="mqtt_user"/></div>
+      <div class="field"><label>MQTT password (optional)</label><input id="mqtt_pass" type="password" placeholder="••••••••"/></div>
+      <div class="field">
+        <label>Choose your plan</label>
+        <div class="plan-cards">
+          <div class="plan-card" onclick="selectPlan(this,'Starter')">
+            <div><div class="plan-card-name">Starter</div><div class="plan-card-desc">Up to 10 nodes · 7-day history</div></div>
+            <div class="plan-card-price">Free</div>
+          </div>
+          <div class="plan-card selected" onclick="selectPlan(this,'Professional')">
+            <div><div class="plan-card-name">Professional ⭐</div><div class="plan-card-desc">Unlimited nodes · Full FL · Reports</div></div>
+            <div class="plan-card-price">₹49,999/mo</div>
+          </div>
+          <div class="plan-card" onclick="selectPlan(this,'Enterprise')">
+            <div><div class="plan-card-name">Enterprise</div><div class="plan-card-desc">Multi-site · On-premise · SLA</div></div>
+            <div class="plan-card-price">Custom</div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="nextStep(1)">← Back</button>
+        <button class="btn btn-primary" onclick="nextStep(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div class="step" id="step3">
+      <div class="success-icon">🎉</div>
+      <div class="step-title" style="text-align:center">You're all set!</div>
+      <div class="step-sub" style="text-align:center">Your CanaryMesh account is ready. Here's what happens next:</div>
+      <div class="success-list">
+        <div class="success-item">Your organisation account is created and secured</div>
+        <div class="success-item">Isolation Forest models are initialising on your node profiles</div>
+        <div class="success-item">Honeypot decoys are being deployed on your network</div>
+        <div class="success-item">Your SOC dashboard is live and monitoring begins immediately</div>
+      </div>
+      <div class="btn-row" style="flex-direction:column;">
+        <button class="btn btn-primary" onclick="goToDashboard()" style="font-size:14px;padding:13px;">
+          Open my SOC dashboard →
+        </button>
+        <a href="../admin/admin.html" style="text-align:center;font-size:12px;color:var(--ts);margin-top:8px;">
+          View as admin (TrustGrid only)
+        </a>
+      </div>
+    </div>
+
+    <div class="progress" id="progressText">Step 1 of 4 — Company information</div>
+  </div>
+</div>
+
+<script>
+let currentStep = 0
+let selectedIndustry = 'Manufacturing'
+let selectedPlan = 'Professional'
+const stepLabels = ['Company information','Select industry','Network & plan','Account created!']
+
+function nextStep(to) {
+  if (to === 1) {
+    if (!document.getElementById('company').value.trim()) { alert('Please enter your company name'); return }
+    if (!document.getElementById('email').value.trim())   { alert('Please enter your email'); return }
+    if (!document.getElementById('password').value || document.getElementById('password').value.length < 6)
+      { alert('Password must be at least 6 characters'); return }
+  }
+  if (to === 3) saveRegistration()
+
+  document.getElementById('step' + currentStep).classList.remove('active')
+  document.getElementById('si' + currentStep).classList.remove('active')
+  document.getElementById('si' + currentStep).classList.add('done')
+  currentStep = to
+  document.getElementById('step' + currentStep).classList.add('active')
+  document.getElementById('si' + currentStep).classList.add('active')
+  document.getElementById('progressText').textContent =
+    `Step ${currentStep + 1} of 4 — ${stepLabels[currentStep]}`
+}
+
+function selectIndustry(el, name) {
+  document.querySelectorAll('.ind-option').forEach(e => e.classList.remove('selected'))
+  el.classList.add('selected')
+  selectedIndustry = name
+}
+
+function selectPlan(el, name) {
+  document.querySelectorAll('.plan-card').forEach(e => e.classList.remove('selected'))
+  el.classList.add('selected')
+  selectedPlan = name
+}
+
+function saveRegistration() {
+  const user = {
+    company:   document.getElementById('company').value,
+    firstName: document.getElementById('fname').value,
+    lastName:  document.getElementById('lname').value,
+    email:     document.getElementById('email').value,
+    password:  document.getElementById('password').value,
+    phone:     document.getElementById('phone').value,
+    size:      document.getElementById('size').value,
+    industry:  selectedIndustry,
+    plan:      selectedPlan,
+    mqttUrl:   document.getElementById('mqtt_url').value || 'simulator',
+    role:      'SOC Admin',
+    createdAt: new Date().toISOString(),
+  }
+  const companies = JSON.parse(localStorage.getItem('cm_companies') || '[]')
+  companies.push(user)
+  localStorage.setItem('cm_companies', JSON.stringify(companies))
+  localStorage.setItem('cm_current_user', JSON.stringify(user))
+}
+
+function goToDashboard() {
+  window.location.href = 'http://localhost:5173/'
+}
+</script>
+</body>
+</html>
