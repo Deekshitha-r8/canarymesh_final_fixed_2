@@ -90,9 +90,7 @@ export function useWebSocket() {
         const socket = new WebSocket(WS_URL)
         wsRef.current = socket
 
-        socket.onopen = () => {
-          setConnected(true)
-        }
+        socket.onopen = () => setConnected(true)
         socket.onclose = () => {
           setConnected(false)
           if (!stoppedRef.current) reconnectTimer.current = window.setTimeout(connect, 2000)
@@ -185,6 +183,15 @@ export function useWebSocket() {
     }
   }, [])
 
+  // REST actions refresh state as well as relying on WebSocket broadcasts. This
+  // keeps the demo buttons visibly functional when the API is available but the
+  // WebSocket is blocked by a proxy, browser extension, or network policy.
+  const refreshAfterAction = useCallback(async (action) => {
+    const result = await action()
+    if (result) await refreshFromApi()
+    return result
+  }, [refreshFromApi])
+
   const send = useCallback((data) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(data))
@@ -209,45 +216,27 @@ export function useWebSocket() {
     return post(path, { method: 'POST' }).then((result) => Boolean(result))
   }, [post])
 
-  const replayAttack = useCallback((deviceId, attackType) => post(`/api/devices/${deviceId}/replay-attack`, {
+  const replayAttack = useCallback((deviceId, attackType) => refreshAfterAction(() => post(`/api/devices/${deviceId}/replay-attack`, {
     method: 'POST',
     body: JSON.stringify({ device_id: deviceId, attack_type: attackType || null }),
-  }), [post])
+  })), [post, refreshAfterAction])
 
-  const addDevice = useCallback((name, nodeType, dataset) => post('/api/devices', {
+  const addDevice = useCallback((name, nodeType, datasetName) => post('/api/devices', {
     method: 'POST',
-    body: JSON.stringify({ name, node_type: nodeType, dataset }),
+    body: JSON.stringify({ name, node_type: nodeType, dataset: datasetName }),
   }).then((result) => Boolean(result?.success)), [post])
 
   const approveAlert = useCallback((alertId) => {
-  const alert = alerts.find((item) => item.id === alertId)
+    const alert = alerts.find((item) => item.id === alertId)
+    if (!alert || alert.severity !== 'MEDIUM') return Promise.resolve(false)
+    return post(`/api/alerts/${alertId}/approve`, { method: 'POST' }).then((result) => Boolean(result?.success))
+  }, [alerts, post])
 
-  if (!alert) {
-    return Promise.resolve(false)
-  }
-
-  if (alert.severity !== 'MEDIUM') {
-    return Promise.resolve(false)
-  }
-
-  return post(`/api/alerts/${alertId}/approve`, {
-    method: 'POST',
-  }).then((result) => Boolean(result?.success))
-}, [alerts, post])
+  const triggerHoneypot = useCallback(() => refreshAfterAction(() => post('/api/simulate/honeypot_probe', { method: 'POST' })), [post, refreshAfterAction])
 
   return {
-    devices,
-    nodes: devices,
-    alerts,
-    fl,
-    connected,
-    apiConnected,
-    mqttLog,
-    sanitLog,
-    dataset,
-    mqttBroker,
-    attackTypes,
-    apiError,
+    devices, nodes: devices, alerts, fl, connected, apiConnected, mqttLog, sanitLog,
+    dataset, mqttBroker, attackTypes, apiError,
     isolateDevice: (id) => send({ action: 'isolate', node_id: id }),
     isolateNode: (id) => send({ action: 'isolate', node_id: id }),
     sanitizeDevice: (id) => send({ action: 'sanitize', node_id: id }),
@@ -256,10 +245,7 @@ export function useWebSocket() {
     reconnectNode: (id) => send({ action: 'reconnect', node_id: id }),
     restoreDevice: (id) => send({ action: 'restore', node_id: id }),
     restoreNode: (id) => send({ action: 'restore', node_id: id }),
-    replayAttack,
-    addDevice,
-    triggerHoneypot: () => post('/api/simulate/honeypot_probe', { method: 'POST' }),
-    approveAlert,
+    replayAttack, addDevice, triggerHoneypot, approveAlert,
     clearAlerts: () => send({ action: 'clear_alerts' }),
   }
 }
