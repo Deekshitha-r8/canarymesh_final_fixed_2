@@ -46,7 +46,7 @@ export default function App() {
 
       <nav style={{ display: 'flex', overflowX: 'auto', borderBottom: `1px solid ${C.border}`, background: C.panel }}>
         {tabs.map(([id, label]) => (
-          <button key={id} onClick={() => setTab(id)} style={{ padding: '10px 14px', color: tab === id ? C.accent : C.ts, background: 'none', border: 0, borderBottom: tab === id ? `2px solid ${C.accent}` : '2px solid transparent', fontSize: 12, cursor: 'pointer' }}>
+          <button key={id} onClick={() => setTab(id)} style={{ padding: '10px 14px', color: tab === id ? C.accent : C.ts, background: 'none', border: 0, borderBottom: tab === id ? `2px solid ${C.accent}` : '2px solid transparent', cursor: 'pointer', fontWeight: 700, fontSize: 11, whiteSpace: 'nowrap' }}>
             {label}{id === 'alerts' && alertCount > 0 ? ` (${alertCount})` : ''}
           </button>
         ))}
@@ -60,7 +60,7 @@ export default function App() {
         )}
         {tab === 'dashboard' && <Dashboard {...shared} />}
         {tab === 'devices' && <NodesTab {...shared} />}
-        {tab === 'alerts' && <AlertsTab alerts={ws.alerts} approveAlert={ws.approveAlert} clearAlerts={ws.clearAlerts} />}
+        {tab === 'alerts' && <AlertsTab alerts={ws.alerts} approveAlert={ws.approveAlert} isolateAlert={ws.isolateDevice} clearAlerts={ws.clearAlerts} />}
         {tab === 'fl' && <FLTab fl={ws.fl} />}
         {tab === 'mqtt' && <MQTTTab mqttLog={ws.mqttLog} mqttBroker={ws.mqttBroker} dataset={ws.dataset} />}
         {tab === 'audit' && <AuditTab />}
